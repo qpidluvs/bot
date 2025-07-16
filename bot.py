@@ -4,6 +4,7 @@ from discord.ext import commands
 from discord import app_commands, ui, Embed, Interaction, ButtonStyle
 from datetime import datetime
 import os
+import asyncio
 
 intents = discord.Intents.default()
 intents.members = True
@@ -295,6 +296,23 @@ class ChannelSelectView(ui.View):
 async def postembed(interaction: discord.Interaction):
     await interaction.response.send_modal(EmbedModal())
 
-token = os.getenv("DISCORD_TOKEN")
-print(f"Token loaded? {'Yes' if token else 'No'}")
-bot.run(token)
+# ===== Minimal web server for Render port binding =====
+async def handle(request):
+    return web.Response(text="Bot is running")
+
+port = int(os.getenv("PORT", 8080))
+app = web.Application()
+app.add_routes([web.get('/', handle)])
+
+async def main():
+    # Start web server
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    print(f"Web server running on port {port}")
+
+    # Start Discord bot
+    await bot.start(os.getenv("DISCORD_TOKEN"))
+
+asyncio.run(main())
