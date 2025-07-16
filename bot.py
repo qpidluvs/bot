@@ -294,5 +294,6 @@ class ChannelSelectView(ui.View):
 @bot.tree.command(name="postembed")
 async def postembed(interaction: discord.Interaction):
     await interaction.response.send_modal(EmbedModal())
+
 import os
 bot.run(os.getenv("DISCORD_TOKEN"))
