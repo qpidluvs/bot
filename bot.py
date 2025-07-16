@@ -4,9 +4,6 @@ from discord.ext import commands
 from discord import app_commands, ui, Embed, Interaction, ButtonStyle
 from datetime import datetime
 import os
-token = os.getenv("DISCORD_TOKEN")
-print(f"Token loaded? {'Yes' if token else 'No'}")
-bot.run(token)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -298,5 +295,6 @@ class ChannelSelectView(ui.View):
 async def postembed(interaction: discord.Interaction):
     await interaction.response.send_modal(EmbedModal())
 
-import os
-bot.run(os.getenv("DISCORD_TOKEN"))
+token = os.getenv("DISCORD_TOKEN")
+print(f"Token loaded? {'Yes' if token else 'No'}")
+bot.run(token)
