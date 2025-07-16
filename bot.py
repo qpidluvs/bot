@@ -1,7 +1,9 @@
+from aiohttp import web
 import discord
 from discord.ext import commands
 from discord import app_commands, ui, Embed, Interaction, ButtonStyle
 from datetime import datetime
+import os
 
 intents = discord.Intents.default()
 intents.members = True
