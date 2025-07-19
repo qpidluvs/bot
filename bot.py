@@ -35,10 +35,10 @@ async def on_member_join(member):
     channel = bot.get_channel(WELCOME_CHANNEL_ID)
     if channel:
         embed = discord.Embed(description=(
-            "<:BLANK:1253814682616201236>﹒<:yellow49:1280655357685006398>﹐**welcome to aria's comms ୨୧ *!***\n"
-            "<:BLANK:1253814682616201236><:BLANK:1253814682616201236><:BLANK:1253814682616201236>⟢　 　⌅　verify [here](https://discord.com/channels/1160986425483862117/1160989507257106536) *!*　⑅　<:yellow47:1280660233756217365>\n"
-            "<:BLANK:1253814682616201236><:BLANK:1253814682616201236> <:yellow48:1280655388181794826> 　♡ 　**check** out **my** services :\n"
-            "<:BLANK:1253814682616201236><:BLANK:1253814682616201236>　₊　　˚　[info](https://discord.com/channels/1160986425483862117/1394729519541391491)　⌑ 　[order](https://discord.com/channels/1160986425483862117/1214937578223046686)　 ✲　 <:yellow43:1280663033588355143>"
+            "<:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐**welcome to aria's comms ୨୧ *!***\n"
+            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>⟢　 　⌅　verify [here](https://discord.com/channels/1160986425483862117/1160989507257106536) *!*　⑅　<:yellow47:1280660233756217365>\n"
+            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562> <:yellow48:1280655388181794826> 　♡ 　**check** out **my** services :\n"
+            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　[info](https://discord.com/channels/1160986425483862117/1394729519541391491)　⌑ 　[order](https://discord.com/channels/1160986425483862117/1214937578223046686)　 ✲　 <:yellow43:1280663033588355143>"
         ), color=EMBED_COLOR)
         embed.set_author(name=member.name, icon_url=member.display_avatar.url)
         embed.set_thumbnail(url="https://www.pngkey.com/png/detail/77-773093_chick-chickee-yellow-kawaii-cute-halloween-tumblr-aesth.png")
