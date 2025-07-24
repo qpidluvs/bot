@@ -28,6 +28,7 @@ EMBED_COLOR = 0xFDFD96
 @bot.event
 async def on_ready():
     await bot.tree.sync()
+    bot.add_view(TicketView())  # register persistent ticket button view here
     print(f"Logged in as {bot.user} and synced commands")
 
 @bot.event
@@ -154,7 +155,15 @@ class OrderModal(ui.Modal, title="new order"):
         await interaction.response.send_message(f"Ticket created: {channel.mention}", ephemeral=True)
 
 class TicketView(ui.View):
-    @ui.button(label="order here !", emoji="<:yellowbread:1283231259878883329>", style=discord.ButtonStyle.secondary)
+    def __init__(self):
+        super().__init__(timeout=None)  # persistent view = never expires
+
+    @ui.button(
+        label="order here !",
+        emoji="<:yellowbread:1283231259878883329>",
+        style=discord.ButtonStyle.secondary,
+        custom_id="open_ticket_button"  # required for persistent views
+    )
     async def order(self, interaction: discord.Interaction, button: ui.Button):
         existing = discord.utils.get(interaction.guild.text_channels, name=f"ticket-{interaction.user.name}")
         if existing:
