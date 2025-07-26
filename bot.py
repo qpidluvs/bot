@@ -84,12 +84,12 @@ async def on_message(message):
             title="customer contract & terms",
             description=(
                 "before placing your order please read and agree to these terms:\n\n"
-                "1. once your order is accepted by our team it’s final, no refunds except for valid reasons\n"
+                "1. once your order is accepted it’s final, no refunds except for valid reasons\n"
                 "2. delivery times can vary depending on how complex your order is and how busy i am\n"
                 "3. you’re responsible for giving clear and accurate info about your order, i can’t fix mistakes caused by unclear details\n"
                 "4. all communication should be respectful and honest, any disrespect may result in order cancellation\n"
                 "5. you agree that i am not responsible for keeping the bot online 24/7.\n"
-                "6. payments need to be done through our approved methods, feel free to reach out if you have any questions before ordering\n\n"
+                "6. payments need to be done through approved methods, feel free to reach out if you have any questions before ordering\n\n"
                 "by accepting these terms you confirm you understand and agree to follow the policies and guidelines"
             ),
             color=0xFDFD96
@@ -231,30 +231,34 @@ async def close(interaction: discord.Interaction):
     await channel.delete()
 
 # ========== QUEUE SYSTEM ==========
-class QueueModal(ui.Modal, title="Queue Entry"):
-    payment = ui.TextInput(label="Payment method", style=discord.TextStyle.short)
+@bot.tree.command(name="queue", description="Add a new order to the queue")
+@app_commands.describe(
+    user="Mention the customer",
+    payment="Payment method"
+)
+async def queue_cmd(interaction: discord.Interaction, user: discord.Member, payment: str):
+    if OWNER_ROLE_ID not in [role.id for role in interaction.user.roles]:
+        await interaction.response.send_message("you don’t have permission to use this", ephemeral=True)
+        return
 
-    async def on_submit(self, interaction: discord.Interaction):
-        if OWNER_ROLE_ID not in [role.id for role in interaction.user.roles]:
-            await interaction.response.send_message("You don’t have permission to use this.", ephemeral=True)
-            return
+    queue_channel = bot.get_channel(QUEUE_CHANNEL_ID)
+    ticket_channel = interaction.channel.mention
 
-        queue_channel = bot.get_channel(QUEUE_CHANNEL_ID)
-        ticket_channel = interaction.channel.mention
-        msg = (
+    embed = discord.Embed(
+        color=0xFDFD96,
+        description=(
             f"**<:yellow49:1280655357685006398> order by** {interaction.user.mention}\n"
-            f"             **<:aayellow:1286493135580430437> ticket:** {ticket_channel}\n"
-            f"             **<:aayellow:1286493135580430437> payment:** {self.payment.value}\n"
-            f"             **<:aayellow:1286493135580430437> order status:** noted\n\n"
-            f"-# thanks for your purchase <:06_dotheart:1262479031928885349>\n"
-            f"<https://media.tenor.com/tthHOe_qi9IAAAAi/yellow-heart-pixel-divider.gif>"
+            f"**<:aayellow:1286493135580430437> ticket:** {ticket_channel}\n"
+            f"**<:aayellow:1286493135580430437> user:** {user.mention}\n"
+            f"**<:aayellow:1286493135580430437> payment:** {payment}\n"
+            f"**<:aayellow:1286493135580430437> order status:** noted\n\n"
+            f"-# thanks for your purchase <:06_dotheart:1262479031928885349>"
         )
-        await queue_channel.send(msg)
-        await interaction.response.send_message("Queue entry posted.", ephemeral=True)
+    )
+    embed.set_image(url="https://media.tenor.com/tthHOe_qi9IAAAAi/yellow-heart-pixel-divider.gif")
 
-@bot.tree.command(name="queue")
-async def queue_cmd(interaction: discord.Interaction):
-    await interaction.response.send_modal(QueueModal())
+    await queue_channel.send(embed=embed)
+    await interaction.response.send_message("queue entry posted ♡", ephemeral=True)
 
 # ========== EMBED POSTER ==========
 class EmbedModal(ui.Modal, title="Custom Embed"):
