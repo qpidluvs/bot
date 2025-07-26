@@ -69,7 +69,7 @@ async def on_message(message):
             @discord.ui.button(label="accept", style=discord.ButtonStyle.success)
             async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
                 await interaction.response.send_message(
-                    "contract accepted, thank you ♡", ephemeral=True
+                    "contract accepted, thank you ♡", ephemeral=False
                 )
                 self.disable_all_items()
                 await interaction.message.edit(view=self)
