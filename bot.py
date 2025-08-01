@@ -47,56 +47,41 @@ async def on_member_join(member):
         embed.set_footer(text=f"Joined on {datetime.now().strftime('%d/%m/%Y at %H:%M')}")
         await channel.send(embed=embed)
 
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
-    # autoresponder for .pp
-    if message.content.lower() == ".pp":
-        await message.channel.send("https://www.paypal.com/paypalme/asiatronci")
-    await bot.process_commands(message)
+@bot.tree.command(name="cct", description="Show customer contract and terms")
+async def cct_command(interaction: discord.Interaction):
+    class ContractView(discord.ui.View):
+        def __init__(self):
+            super().__init__(timeout=None)
 
-@bot.event
-async def on_message(message):
-    if message.author.bot:
-        return
+        @discord.ui.button(label="accept", style=discord.ButtonStyle.success)
+        async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
+            await interaction.response.send_message(
+                "contract accepted, thank you ♡", ephemeral=False
+            )
+            self.disable_all_items()
+            await interaction.message.edit(view=self)
 
-    if message.content.lower() == ".cct":
-        class ContractView(discord.ui.View):
-            def __init__(self):
-                super().__init__(timeout=None)
+        @discord.ui.button(label="decline", style=discord.ButtonStyle.danger)
+        async def decline(self, interaction: discord.Interaction, button: discord.ui.Button):
+            await interaction.response.send_message(
+                "you must accept the contract before ordering", ephemeral=True
+            )
 
-            @discord.ui.button(label="accept", style=discord.ButtonStyle.success)
-            async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
-                await interaction.response.send_message(
-                    "contract accepted, thank you ♡", ephemeral=False
-                )
-                self.disable_all_items()
-                await interaction.message.edit(view=self)
-
-            @discord.ui.button(label="decline", style=discord.ButtonStyle.danger)
-            async def decline(self, interaction: discord.Interaction, button: discord.ui.Button):
-                await interaction.response.send_message(
-                    "you must accept the contract before ordering", ephemeral=True
-                )
-
-        embed = discord.Embed(
-            title="customer contract & terms",
-            description=(
-                "before placing your order please read and agree to these terms:\n\n"
-                "1. once your order is accepted it’s final, no refunds except for valid reasons\n"
-                "2. delivery times can vary depending on how complex your order is and how busy i am\n"
-                "3. you’re responsible for giving clear and accurate info about your order, i can’t fix mistakes caused by unclear details\n"
-                "4. all communication should be respectful and honest, any disrespect may result in order cancellation\n"
-                "5. you agree that i am not responsible for keeping the bot online 24/7.\n"
-                "6. payments need to be done through approved methods, feel free to reach out if you have any questions before ordering\n\n"
-                "by accepting these terms you confirm you understand and agree to follow the policies and guidelines"
-            ),
-            color=0xFDFD96
-        )
-        await message.channel.send(embed=embed, view=ContractView())
-
-    await bot.process_commands(message)
+    embed = discord.Embed(
+        title="customer contract & terms",
+        description=(
+            "before placing your order please read and agree to these terms:\n\n"
+            "1. once your order is accepted it’s final, no refunds except for valid reasons\n"
+            "2. delivery times can vary depending on how complex your order is and how busy i am\n"
+            "3. you’re responsible for giving clear and accurate info about your order, i can’t fix mistakes caused by unclear details\n"
+            "4. all communication should be respectful and honest, any disrespect may result in order cancellation\n"
+            "5. you agree that i am not responsible for keeping the bot online 24/7.\n"
+            "6. payments need to be done through approved methods, feel free to reach out if you have any questions before ordering\n\n"
+            "by accepting these terms you confirm you understand and agree to follow the policies and guidelines"
+        ),
+        color=0xFDFD96
+    )
+    await interaction.response.send_message(embed=embed, view=ContractView())
 
 # ========== VERIFICATION ==========
 @bot.event
@@ -308,6 +293,14 @@ class ChannelSelectView(ui.View):
 @bot.tree.command(name="postembed")
 async def postembed(interaction: discord.Interaction):
     await interaction.response.send_modal(EmbedModal())
+
+@bot.tree.command(name="pp", description="Get the PayPal link")
+async def pp_command(interaction: discord.Interaction):
+    await interaction.response.send_message(
+        "<:paypal:1396141917372416144> https://www.paypal.com/paypalme/asiatronci\n"
+        "-# **send with __fnf only__**\n"
+        "-# **tips are appreciated <:06_dotheart:1262479031928885349>**"
+    )
 
 # ===== Minimal web server for Render port binding =====
 async def handle(request):
