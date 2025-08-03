@@ -245,6 +245,29 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
     await queue_channel.send(embed=embed)
     await interaction.response.send_message("queue entry posted ♡", ephemeral=True)
 
+# ========== GUIDE LINK ============
+@bot.tree.command(name="guide", description="Send guide link with bot files.")
+async def guide(interaction: discord.Interaction):
+    attachments = interaction.attachments  # User-uploaded files
+
+    message = (
+        "Thank you for buying from aria's comms *!* <a:zumilkhug:1262475999623512154>\n"
+        "Here you can find the guide to keep your bot online 24/7: "
+        "https://docs.google.com/document/d/19PktPwsZNWRspD9pI_x1Elgy-DYL_A83M7dljiPC57k/edit?usp=sharing\n"
+        "You can find your needed files attached to this message."
+    )
+
+    if attachments:
+        files = []
+        for attachment in attachments:
+            data = await attachment.read()
+            file = discord.File(io.BytesIO(data), filename=attachment.filename)
+            files.append(file)
+
+        await interaction.response.send_message(content=message, files=files, ephemeral=False)
+    else:
+        await interaction.response.send_message(content=message, ephemeral=False)
+
 # ========== EMBED POSTER ==========
 class EmbedModal(ui.Modal, title="Custom Embed"):
     def __init__(self):
@@ -322,3 +345,4 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
