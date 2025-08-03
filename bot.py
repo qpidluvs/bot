@@ -247,11 +247,18 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
     await interaction.response.send_message("queue entry posted ♡", ephemeral=True)
 
 # ========== GUIDE LINK ============
-@bot.tree.command(name="guide", description="Send guide link with bot files.")
+@bot.tree.command(name="guide", description="Test guide command with file upload.")
 async def guide(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=False)  # Prevent timeout
+    await interaction.response.defer(ephemeral=False)
 
-    attachments = interaction.attachments  # User-uploaded files
+    print("Received /guide command")
+
+    files = []
+    for attachment in interaction.attachments:
+        print(f"Reading file: {attachment.filename}")
+        data = await attachment.read()
+        file = discord.File(fp=io.BytesIO(data), filename=attachment.filename)
+        files.append(file)
 
     message = (
         "Thank you for buying from aria's comms *!* <a:zumilkhug:1262475999623512154>\n"
@@ -260,16 +267,7 @@ async def guide(interaction: discord.Interaction):
         "You can find your needed files attached to this message."
     )
 
-    if attachments:
-        files = []
-        for attachment in attachments:
-            data = await attachment.read()
-            file = discord.File(io.BytesIO(data), filename=attachment.filename)
-            files.append(file)
-
-        await interaction.followup.send(content=message, files=files, ephemeral=False)
-    else:
-        await interaction.followup.send(content=message, ephemeral=False)
+    await interaction.followup.send(content=message, files=files, ephemeral=False)
 
 # ========== EMBED POSTER ==========
 class EmbedModal(ui.Modal, title="Custom Embed"):
@@ -348,6 +346,7 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
 
 
