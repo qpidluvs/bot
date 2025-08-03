@@ -248,6 +248,8 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
 # ========== GUIDE LINK ============
 @bot.tree.command(name="guide", description="Send guide link with bot files.")
 async def guide(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=False)  # Prevent timeout
+
     attachments = interaction.attachments  # User-uploaded files
 
     message = (
@@ -264,9 +266,9 @@ async def guide(interaction: discord.Interaction):
             file = discord.File(io.BytesIO(data), filename=attachment.filename)
             files.append(file)
 
-        await interaction.response.send_message(content=message, files=files, ephemeral=False)
+        await interaction.followup.send(content=message, files=files, ephemeral=False)
     else:
-        await interaction.response.send_message(content=message, ephemeral=False)
+        await interaction.followup.send(content=message, ephemeral=False)
 
 # ========== EMBED POSTER ==========
 class EmbedModal(ui.Modal, title="Custom Embed"):
@@ -345,4 +347,5 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
