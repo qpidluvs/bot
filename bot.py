@@ -37,7 +37,7 @@ async def on_member_join(member):
     channel = bot.get_channel(WELCOME_CHANNEL_ID)
     if channel:
         embed = discord.Embed(description=(
-            "<:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐**welcome to aria's comms ୨୧ *!***\n"
+            "<:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐**welcome to aria's bots ୨୧ *!***\n"
             "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>⟢　 　⌅　verify [here](https://discord.com/channels/1160986425483862117/1160989507257106536) *!*　⑅　<:yellow47:1280660233756217365>\n"
             "<:BLANK:1258497106293952562><:BLANK:1258497106293952562> <:yellow48:1280655388181794826> 　♡ 　**check** out **my** services :\n"
             "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　[info](https://discord.com/channels/1160986425483862117/1394729519541391491)　⌑ 　[order](https://discord.com/channels/1160986425483862117/1214937578223046686)　 ✲　 <:yellow43:1280663033588355143>"
@@ -250,7 +250,7 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
 @bot.tree.command(name="guide", description="Send the thank-you and guide message.")
 async def guide(interaction: discord.Interaction):
     embed = discord.Embed(
-        title="**thank you for buying from aria’s comms *!***",
+        title="**thank you for buying from aria’s bots *!***",
         description=(
             "<a:zumilkhug:1262475999623512154> **here’s your 24/7 hosting guide:**\n"
             "<:06_dotheart:1262479031928885349> **[click here](https://docs.google.com/document/d/19PktPwsZNWRspD9pI_x1Elgy-DYL_A83M7dljiPC57k/edit?usp=sharing)**\n\n"
@@ -338,6 +338,7 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
 
 
