@@ -250,11 +250,10 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
 @bot.tree.command(name="guide", description="Send the thank-you and guide message.")
 async def guide(interaction: discord.Interaction):
     embed = discord.Embed(
-        title="**thank you for buying from aria’s bots *!***",
+        title="**thank you for buying from aria’s bots *!*** <a:white_stars:1401924394787541012>",
         description=(
-            "<a:zumilkhug:1262475999623512154> **here’s your 24/7 hosting guide:**\n"
-            "<:06_dotheart:1262479031928885349> **[click here](https://docs.google.com/document/d/19PktPwsZNWRspD9pI_x1Elgy-DYL_A83M7dljiPC57k/edit?usp=sharing)**\n\n"
-            "<:06_dotheart:1262479031928885349> **don’t forget to [vouch here](https://discord.com/channels/1160986425483862117/1160992163644063805) *!***"
+            "<:06_dotheart:1262479031928885349> **here’s your 24/7 hosting guide: [click here](https://docs.google.com/document/d/19PktPwsZNWRspD9pI_x1Elgy-DYL_A83M7dljiPC57k/edit?usp=sharing)**\n\n"
+            "<:06_dotheart:1262479031928885349> **don’t forget to [vouch here](https://discord.com/channels/1160986425483862117/1160992163644063805) *!***\n"
             "<:06_dotheart:1262479031928885349> **your needed bot files will be sent right after this message**"
         ),
         color=0xFDFD96
@@ -338,6 +337,7 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
 
 
