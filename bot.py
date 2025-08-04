@@ -247,27 +247,18 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
     await interaction.response.send_message("queue entry posted ♡", ephemeral=True)
 
 # ========== GUIDE LINK ============
-@bot.tree.command(name="guide", description="Test guide command with file upload.")
+@bot.tree.command(name="guide", description="Send the thank-you and guide message.")
 async def guide(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=False)
-
-    print("Received /guide command")
-
-    files = []
-    for attachment in interaction.attachments:
-        print(f"Reading file: {attachment.filename}")
-        data = await attachment.read()
-        file = discord.File(fp=io.BytesIO(data), filename=attachment.filename)
-        files.append(file)
-
-    message = (
-        "Thank you for buying from aria's comms *!* <a:zumilkhug:1262475999623512154>\n"
-        "Here you can find the guide to keep your bot online 24/7: "
-        "https://docs.google.com/document/d/19PktPwsZNWRspD9pI_x1Elgy-DYL_A83M7dljiPC57k/edit?usp=sharing\n"
-        "You can find your needed files attached to this message."
+    embed = discord.Embed(
+        title="**thank you for buying from aria’s comms *!***",
+        description=(
+            "<a:zumilkhug:1262475999623512154> **here’s your 24/7 hosting guide:**\n"
+            "<:06_dotheart:1262479031928885349> **[click here](https://docs.google.com/document/d/19PktPwsZNWRspD9pI_x1Elgy-DYL_A83M7dljiPC57k/edit?usp=sharing)**\n\n"
+            "<:06_dotheart:1262479031928885349> **don’t forget to [vouch here](https://discord.com/channels/1160986425483862117/1160992163644063805) *!***"
+        ),
+        color=0xFDFD96
     )
-
-    await interaction.followup.send(content=message, files=files, ephemeral=False)
+    await interaction.response.send_message(embed=embed, ephemeral=False)
 
 # ========== EMBED POSTER ==========
 class EmbedModal(ui.Modal, title="Custom Embed"):
@@ -346,6 +337,7 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
 
 
