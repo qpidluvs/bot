@@ -105,7 +105,7 @@ async def sendverify(interaction: discord.Interaction):
         description=(
             "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐　verify 　୨୧　! \n"
             "<:BLANK:1258497106293952562>⟢ 　⌅　welcome to aria's services　 <:yellow47:1280660233756217365>\n"
-            "<:BLANK:1258497106293952562><:yellow43:1280663033588355143> 　 ♡ 　 to verify, type : heart\n"
+            "<:BLANK:1258497106293952562><:yellow43:1280663033588355143> 　 ♡ 　 to verify, react to the emoji\n"
             "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　enjoy !　⌑ 　 ✲　<:yellow48:1280655388181794826>"
         ),
         color=EMBED_COLOR
@@ -337,6 +337,7 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
 
 
