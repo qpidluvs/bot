@@ -24,6 +24,8 @@ TICKET_CATEGORY_ID = 1160992684039741510
 VERIFIED_ROLE_ID = 1161267510595825754
 OWNER_ROLE_ID = 1161650985823912006
 EMBED_COLOR = 0xFDFD96
+TICKET_CHANNEL_ID = 1214937578223046686  # ticket embed channel
+TRANSCRIPT_CHANNEL_ID = 1394831778337788006  # close ticket transcript log
 
 # ========== EVENTS ==========
 @bot.event
@@ -31,6 +33,31 @@ async def on_ready():
     await bot.tree.sync()
     bot.add_view(TicketView())  # register persistent ticket button view here
     print(f"Logged in as {bot.user} and synced commands")
+    
+    # --- AUTO-SEND VERIFICATION EMBED ON STARTUP ---
+    verify_channel = bot.get_channel(VERIFY_CHANNEL_ID)
+    if verify_channel:
+        embed = discord.Embed(
+            description=(
+                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐　verify 　୨୧　! \n"
+                "<:BLANK:1258497106293952562>⟢ 　⌅　welcome to aria's services　 <:yellow47:1280660233756217365>\n"
+                "<:BLANK:1258497106293952562><:yellow43:1280663033588355143> 　 ♡ 　 to verify, react to the emoji\n"
+                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　enjoy !　⌑ 　 ✲　<:yellow48:1280655388181794826>"
+            ),
+            color=EMBED_COLOR
+        )
+        embed.set_image(url="https://64.media.tumblr.com/76b0010bc7d5e4599c7ebdfc2184808b/5e10528fe60c4a2c-40/s2048x3072/daaee3b4519dcedf4fd709024a54034af4f48402.pnj")
+        msg = await verify_channel.send(embed=embed)
+        await msg.add_reaction("<:yellow50:1280655495375622207>")
+
+    # --- AUTO-SEND TICKET EMBED ON STARTUP ---
+    ticket_channel = bot.get_channel(TICKET_CHANNEL_ID)
+    if ticket_channel:
+        embed = discord.Embed(
+            description="click the button below to open your order ticket ♡",
+            color=EMBED_COLOR
+        )
+        await ticket_channel.send(embed=embed, view=TicketView())
 
 @bot.event
 async def on_member_join(member):
@@ -48,6 +75,7 @@ async def on_member_join(member):
         embed.set_footer(text=f"Joined on {datetime.now().strftime('%d/%m/%Y at %H:%M')}")
         await channel.send(embed=embed)
 
+# ========== CCT COMMAND ==========
 @bot.tree.command(name="cct", description="Show customer contract and terms")
 async def cct_command(interaction: discord.Interaction):
     class ContractView(discord.ui.View):
@@ -56,17 +84,13 @@ async def cct_command(interaction: discord.Interaction):
 
         @discord.ui.button(label="accept", style=discord.ButtonStyle.success)
         async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
-            await interaction.response.send_message(
-                "contract accepted, thank you ♡", ephemeral=False
-            )
+            await interaction.response.send_message("contract accepted, thank you ♡", ephemeral=False)
             self.disable_all_items()
             await interaction.message.edit(view=self)
 
         @discord.ui.button(label="decline", style=discord.ButtonStyle.danger)
         async def decline(self, interaction: discord.Interaction, button: discord.ui.Button):
-            await interaction.response.send_message(
-                "you must accept the contract before ordering", ephemeral=True
-            )
+            await interaction.response.send_message("you must accept the contract before ordering", ephemeral=True)
 
     embed = discord.Embed(
         title="customer contract & terms",
@@ -156,65 +180,6 @@ class TicketView(ui.View):
             await interaction.response.send_message("you already have an open ticket!", ephemeral=True)
         else:
             await interaction.response.send_modal(OrderModal())
-
-@bot.tree.command(name="ticket", description="send the ticket embed in the designated channel")
-async def ticket(interaction: discord.Interaction):
-    target_channel_id = 1214937578223046686  # replace with your real channel ID
-    target_channel = interaction.guild.get_channel(target_channel_id)
-
-    if not target_channel:
-        await interaction.response.send_message("Could not find the ticket channel.", ephemeral=True)
-        return
-
-    embed = discord.Embed(
-        description="click the button below to open your order ticket ♡",
-        color=0xFDFD96
-    )
-
-    await target_channel.send(embed=embed, view=TicketView())
-    await interaction.response.send_message("ticket embed sent in the correct channel ♡", ephemeral=True)
-
-@bot.tree.command(name="close", description="Close the current ticket channel and save transcript")
-async def close(interaction: discord.Interaction):
-    channel = interaction.channel
-    log_channel_id = 1394831778337788006  # your transcript log channel
-    log_channel = interaction.guild.get_channel(log_channel_id)
-
-    if not channel.name.startswith("ticket-"):
-        await interaction.response.send_message("this command can only be used in a ticket channel", ephemeral=True)
-        return
-
-    # Send initial response to acknowledge the command
-    await interaction.response.send_message("closing ticket and saving transcript...", ephemeral=True)
-
-    try:
-        # Fetch last 300 messages in the channel
-        messages = [msg async for msg in channel.history(limit=300, oldest_first=True)]
-
-        # Build transcript text
-        transcript_lines = []
-        for msg in messages:
-            timestamp = msg.created_at.strftime("%Y-%m-%d %H:%M:%S")
-            author = f"{msg.author.display_name}#{msg.author.discriminator}"
-            content = msg.clean_content
-            transcript_lines.append(f"[{timestamp}] {author}: {content}")
-
-        transcript_text = "\n".join(transcript_lines)
-
-        # Create a file-like object
-        from io import StringIO
-        transcript_file = discord.File(StringIO(transcript_text), filename=f"transcript-{channel.name}.txt")
-
-        # Send transcript to log channel
-        await log_channel.send(content=f"transcript for {channel.mention} closed by {interaction.user.mention}", file=transcript_file)
-
-    except Exception as e:
-        # If an error occurs, send a follow-up message and abort deletion
-        await interaction.followup.send(f"error saving transcript: {e}", ephemeral=True)
-        return
-
-    # Delete the ticket channel last
-    await channel.delete()
 
 # ========== QUEUE SYSTEM ==========
 @bot.tree.command(name="queue", description="Add a new order to the queue")
@@ -337,6 +302,7 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
+
 
 
 
