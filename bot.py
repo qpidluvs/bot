@@ -1,10 +1,9 @@
 from aiohttp import web
 import discord
 from discord.ext import commands
-from discord import app_commands, ui, Embed, Interaction, ButtonStyle
+from discord import app_commands, ui
 from datetime import datetime
 import os
-import io
 import asyncio
 
 intents = discord.Intents.default()
@@ -31,7 +30,7 @@ TRANSCRIPT_CHANNEL_ID = 1394831778337788006
 @bot.event
 async def on_ready():
     await bot.tree.sync()
-    bot.add_view(TicketView())  # register persistent ticket button view here
+    bot.add_view(TicketView())  # register persistent ticket button view
     print(f"Logged in as {bot.user} and synced commands")
     
     # --- AUTO-SEND VERIFICATION EMBED ON STARTUP ---
@@ -39,7 +38,8 @@ async def on_ready():
     if verify_channel:
         embed = discord.Embed(
             description=(
-                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐　verify 　୨୧　! \n"
+                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>﹒"
+                "<:yellow49:1280655357685006398>﹐　verify 　୨୧　! \n"
                 "<:BLANK:1258497106293952562>⟢ 　⌅　welcome to aria's services　 <:yellow47:1280660233756217365>\n"
                 "<:BLANK:1258497106293952562><:yellow43:1280663033588355143> 　 ♡ 　 to verify, react to the emoji\n"
                 "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　enjoy !　⌑ 　 ✲　<:yellow48:1280655388181794826>"
@@ -63,12 +63,15 @@ async def on_ready():
 async def on_member_join(member):
     channel = bot.get_channel(WELCOME_CHANNEL_ID)
     if channel:
-        embed = discord.Embed(description=(
-            "<:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐**welcome to aria's bots ୨୧ *!***\n"
-            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>⟢　 　⌅　verify [here](https://discord.com/channels/1160986425483862117/1160989507257106536) *!*　⑅　<:yellow47:1280660233756217365>\n"
-            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562> <:yellow48:1280655388181794826> 　♡ 　**check** out **my** services :\n"
-            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　[info](https://discord.com/channels/1160986425483862117/1394729519541391491)　⌑ 　[order](https://discord.com/channels/1160986425483862117/1214937578223046686)　 ✲　 <:yellow43:1280663033588355143>"
-        ), color=EMBED_COLOR)
+        embed = discord.Embed(
+            description=(
+                "<:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐**welcome to aria's bots ୨୧ *!***\n"
+                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>⟢　 　⌅　verify [here](https://discord.com/channels/1160986425483862117/1160989507257106536) *!*　⑅　<:yellow47:1280660233756217365>\n"
+                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562> <:yellow48:1280655388181794826> 　♡ 　**check** out **my** services :\n"
+                "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　[info](https://discord.com/channels/1160986425483862117/1394729519541391491)　⌑ 　[order](https://discord.com/channels/1160986425483862117/1214937578223046686)　 ✲　 <:yellow43:1280663033588355143>"
+            ),
+            color=EMBED_COLOR
+        )
         embed.set_author(name=member.name, icon_url=member.display_avatar.url)
         embed.set_thumbnail(url="https://www.pngkey.com/png/detail/77-773093_chick-chickee-yellow-kawaii-cute-halloween-tumblr-aesth.png")
         embed.set_image(url="https://i.pinimg.com/564x/31/44/fe/3144fef2282a322cbab243d73e71653f.jpg")
@@ -78,18 +81,18 @@ async def on_member_join(member):
 # ========== CCT COMMAND ==========
 @bot.tree.command(name="cct", description="Show customer contract and terms")
 async def cct_command(interaction: discord.Interaction):
-    class ContractView(discord.ui.View):
+    class ContractView(ui.View):
         def __init__(self):
             super().__init__(timeout=None)
 
-        @discord.ui.button(label="accept", style=discord.ButtonStyle.success)
-        async def accept(self, interaction: discord.Interaction, button: discord.ui.Button):
+        @ui.button(label="accept", style=discord.ButtonStyle.success)
+        async def accept(self, interaction: discord.Interaction, button: ui.Button):
             await interaction.response.send_message("contract accepted, thank you ♡", ephemeral=False)
             self.disable_all_items()
             await interaction.message.edit(view=self)
 
-        @discord.ui.button(label="decline", style=discord.ButtonStyle.danger)
-        async def decline(self, interaction: discord.Interaction, button: discord.ui.Button):
+        @ui.button(label="decline", style=discord.ButtonStyle.danger)
+        async def decline(self, interaction: discord.Interaction, button: ui.Button):
             await interaction.response.send_message("you must accept the contract before ordering", ephemeral=True)
 
     embed = discord.Embed(
@@ -166,13 +169,13 @@ class OrderModal(ui.Modal, title="new order"):
 
 class TicketView(ui.View):
     def __init__(self):
-        super().__init__(timeout=None)  # persistent view = never expires
+        super().__init__(timeout=None)  # persistent view
 
     @ui.button(
         label="order here !",
         emoji="<:yellowbread:1283231259878883329>",
         style=discord.ButtonStyle.secondary,
-        custom_id="open_ticket_button"  # required for persistent views
+        custom_id="open_ticket_button"
     )
     async def order(self, interaction: discord.Interaction, button: ui.Button):
         existing = discord.utils.get(interaction.guild.text_channels, name=f"ticket-{interaction.user.name}")
@@ -211,7 +214,7 @@ async def queue_cmd(interaction: discord.Interaction, user: discord.Member, paym
     await queue_channel.send(embed=embed)
     await interaction.response.send_message("queue entry posted ♡", ephemeral=True)
 
-# ========== GUIDE LINK ============
+# ========== GUIDE LINK ==========
 @bot.tree.command(name="guide", description="Send the thank-you and guide message.")
 async def guide(interaction: discord.Interaction):
     embed = discord.Embed(
@@ -274,6 +277,7 @@ class ChannelSelectView(ui.View):
 async def postembed(interaction: discord.Interaction):
     await interaction.response.send_modal(EmbedModal())
 
+# ========== PAYPAL ==========
 @bot.tree.command(name="pp", description="Get the PayPal link")
 async def pp_command(interaction: discord.Interaction):
     await interaction.response.send_message(
@@ -302,14 +306,3 @@ async def main():
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
-
-
-
-
-
-
-
-
-
-
-
