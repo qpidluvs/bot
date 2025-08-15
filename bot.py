@@ -1,10 +1,11 @@
 from aiohttp import web
+import os
+import asyncio
+import io
 import discord
 from discord.ext import commands
 from discord import app_commands, ui
 from datetime import datetime
-import os
-import asyncio
 
 intents = discord.Intents.default()
 intents.members = True
@@ -40,7 +41,7 @@ async def on_ready():
             description=(
                 "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>﹒"
                 "<:yellow49:1280655357685006398>﹐　verify 　୨୧　! \n"
-                "<:BLANK:1258497106293952562>⟢ 　⌅　welcome to aria's services　 <:yellow47:1280660233756217365>\n"
+                "<:BLANK:1258497106293952562>⟢ 　⌅　welcome to aria's bots　 <:yellow47:1280660233756217365>\n"
                 "<:BLANK:1258497106293952562><:yellow43:1280663033588355143> 　 ♡ 　 to verify, react to the emoji\n"
                 "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　enjoy !　⌑ 　 ✲　<:yellow48:1280655388181794826>"
             ),
@@ -53,12 +54,37 @@ async def on_ready():
     # --- AUTO-SEND TICKET EMBED ON STARTUP ---
     ticket_channel = bot.get_channel(TICKET_CHANNEL_ID)
     if ticket_channel:
+        # Delete old bot messages
+        async for msg in ticket_channel.history(limit=100):
+            if msg.author == bot.user:
+                await msg.delete()
+
+        # --- NEW INFO EMBED ---
+        info_embed = discord.Embed(
+            title="<:yellowcake:1283231218850201671> read before ordering *!*",
+            description=(
+                "1. **be clear**: tell me exactly what kind of bot you want and what features you need.\n"
+                "2. **price range**: my commissions usually go from €2 / 400 rbx up (basic bots) to €50 / 10k rbx (very complex bots) depending on how much work it takes. being clear about what you want allows me to calculate the right price.\n"
+                "3. **payment**: i ask for half the price upfront before starting and the rest when the bot is done. once you pay, I’ll send you the bot’s code and simple instructions to get it running. i’ll help you set up and fix any bugs for a week after delivery.\n"
+                "4. **i don’t host the bot for you**, you’ll be in charge of keeping it online on your own server or hosting service BUT i will provide a nice and easy guide for you to do it.\n"
+                "5. **changes**: i don't really make changes once the bot is done, unless there are some mistakes in the code or bugs.\n"
+                "6. **communication**: please try to reply as soon as you can, this contributes to a smooth and quick work.\n"
+                "7. **cancellations**: you can cancel anytime before i start for a full refund -- after i do, the deposit isn’t refundable.\n"
+                "8. **support**: after the delivery, you can always contact me for support regarding the bot, if you need help or the bot is having issues."
+            ),
+            color=EMBED_COLOR
+        )
+        info_embed.set_thumbnail(url="https://cdn.discordapp.com/emojis/979808417403248711.gif")
+        await ticket_channel.send(embed=info_embed)
+
+        # --- ORIGINAL TICKET EMBED WITH BUTTON ---
         embed = discord.Embed(
-            description="click the button below to open your order ticket ♡",
+            description="click the button below to open your ticket ♡",
             color=EMBED_COLOR
         )
         await ticket_channel.send(embed=embed, view=TicketView())
 
+# ========== REST OF YOUR CODE EXACTLY AS IT WAS ==========
 @bot.event
 async def on_member_join(member):
     channel = bot.get_channel(WELCOME_CHANNEL_ID)
@@ -121,28 +147,6 @@ async def on_raw_reaction_add(payload):
         if role and member:
             await member.add_roles(role)
 
-@bot.tree.command(name="sendverify")
-async def sendverify(interaction: discord.Interaction):
-    channel = bot.get_channel(VERIFY_CHANNEL_ID)
-    if not channel:
-        await interaction.response.send_message("Verification channel not found.", ephemeral=True)
-        return
-
-    embed = discord.Embed(
-        description=(
-            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562><:BLANK:1258497106293952562>﹒<:yellow49:1280655357685006398>﹐　verify 　୨୧　! \n"
-            "<:BLANK:1258497106293952562>⟢ 　⌅　welcome to aria's services　 <:yellow47:1280660233756217365>\n"
-            "<:BLANK:1258497106293952562><:yellow43:1280663033588355143> 　 ♡ 　 to verify, react to the emoji\n"
-            "<:BLANK:1258497106293952562><:BLANK:1258497106293952562>　₊　　˚　enjoy !　⌑ 　 ✲　<:yellow48:1280655388181794826>"
-        ),
-        color=EMBED_COLOR
-    )
-    embed.set_image(url="https://64.media.tumblr.com/76b0010bc7d5e4599c7ebdfc2184808b/5e10528fe60c4a2c-40/s2048x3072/daaee3b4519dcedf4fd709024a54034af4f48402.pnj")
-
-    message = await channel.send(embed=embed)
-    await message.add_reaction("<:yellow50:1280655495375622207>")
-    await interaction.response.send_message("Verification embed sent in the verification channel!", ephemeral=True)
-
 # ========== TICKET SYSTEM ==========
 class OrderModal(ui.Modal, title="new order"):
     feature = ui.TextInput(label="what commands/features?", style=discord.TextStyle.paragraph)
@@ -183,6 +187,47 @@ class TicketView(ui.View):
             await interaction.response.send_message("you already have an open ticket!", ephemeral=True)
         else:
             await interaction.response.send_modal(OrderModal())
+
+# ========== CLOSE TICKET ==========
+@bot.tree.command(name="close", description="Close the current ticket and save transcript")
+async def close_ticket(interaction: discord.Interaction):
+    channel = interaction.channel
+    guild = interaction.guild
+
+    # Only allow ticket owner or owner role to close
+    if OWNER_ROLE_ID not in [role.id for role in interaction.user.roles] and not channel.name.startswith(f"ticket-{interaction.user.name}"):
+        await interaction.response.send_message("You cannot close this ticket.", ephemeral=True)
+        return
+
+    # Fetch all messages for transcript
+    messages = []
+    async for msg in channel.history(limit=None, oldest_first=True):
+        timestamp = msg.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        content = msg.content if msg.content else ""
+        attachments = ", ".join([att.url for att in msg.attachments])
+        line = f"[{timestamp}] {msg.author}: {content}"
+        if attachments:
+            line += f" (Attachments: {attachments})"
+        messages.append(line)
+
+    transcript_text = "\n".join(messages)
+
+    # Create an in-memory file
+    transcript_file = io.BytesIO(transcript_text.encode("utf-8"))
+    transcript_file.seek(0)
+
+    # Send transcript to transcript channel
+    transcript_channel = bot.get_channel(TRANSCRIPT_CHANNEL_ID)
+    if transcript_channel:
+        file_name = f"{channel.name}_transcript.txt"
+        await transcript_channel.send(
+            content=f"Transcript for {channel.name}",
+            file=discord.File(fp=transcript_file, filename=file_name)
+        )
+
+    # Delete ticket channel
+    await interaction.response.send_message(f"Closing {channel.mention}...", ephemeral=True)
+    await channel.delete()
 
 # ========== QUEUE SYSTEM ==========
 @bot.tree.command(name="queue", description="Add a new order to the queue")
@@ -286,7 +331,6 @@ async def pp_command(interaction: discord.Interaction):
         "-# **tips are appreciated <:06_dotheart:1262479031928885349>**"
     )
 
-# ===== Minimal web server for Render port binding =====
 async def handle(request):
     return web.Response(text="Bot is running")
 
@@ -295,14 +339,12 @@ app = web.Application()
 app.add_routes([web.get('/', handle)])
 
 async def main():
-    # Start web server
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', port)
     await site.start()
     print(f"Web server running on port {port}")
 
-    # Start Discord bot
     await bot.start(os.getenv("DISCORD_TOKEN"))
 
 asyncio.run(main())
